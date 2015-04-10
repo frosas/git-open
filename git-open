@@ -6,40 +6,25 @@
 # git open
 # git open [remote] [branch]
 
-
 # are we in a git repo?
-git rev-parse --is-inside-work-tree &>/dev/null
-
-if [[ $? != 0 ]]
-then
+if ! git rev-parse --is-inside-work-tree &> /dev/null; then
     echo "Not a git repository."
     exit 1
 fi
 
-
-# assume origin if not provided
-# fallback to upstream if neither is present.
-remote="origin"
-if [ ! -z "$1" ]
-then
-    remote="$1"
-fi
-
-remote_url="remote.${remote}.url"
-
-giturl=$(git config --get $remote_url)
-if [ -z "$giturl" ]
-then
-    echo "$remote_url not set."
-    exit 1
-fi
-
 # get current branch
-if [ -z "$2" ]
-then
-    branch=`git symbolic-ref -q --short HEAD`
-else
-    branch="$2"
+branch="$2"
+if [ -z "$branch" ]; then branch=$(git symbolic-ref -q --short HEAD); fi
+
+# Assume upstream remote or 'origin' if none is provided
+remote="$1"
+if [ -z "$remote" ]; then remote=$(git config branch.$branch.remote); fi
+if [ -z "$remote" ]; then remote="origin"; fi
+
+giturl=$(git config remote.$remote.url)
+if [ -z "$giturl" ]; then
+    echo "Unknown remote $remote."
+    exit 1
 fi
 
 # URL normalization
