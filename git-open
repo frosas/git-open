@@ -50,21 +50,20 @@ if grep -q bitbucket <<<$giturl; then
 # Atlassian Stash
 elif grep -q "/scm/" <<<$giturl; then
   re='(.*)/scm/(.*)/(.*)\.git'
-  if [[ $giturl =~ $re ]]
-  then
+  if [[ $giturl =~ $re ]]; then
     giturl=${BASH_REMATCH[1]}/projects/${BASH_REMATCH[2]}/repos/${BASH_REMATCH[3]}
     providerUrlDifference=browse
     branch="?at=refs%2Fheads%2F${branch}"
   fi
 else
-  # custom gitlab
+  # Custom GitLab
   gitlab_domain=$(git config --get gitopen.gitlab.domain)
   if [ ! -z "$gitlab_domain" ]; then
     if grep -q $gitlab_domain <<<$giturl; then
       giturl=${giturl/git\@${gitlab_domain}:/https://${gitlab_domain}/}
       providerUrlDifference=tree
     fi
-  # hosted gitlab
+  # Hosted GitLab
   elif grep -q gitlab <<<$giturl; then
     giturl=${giturl/git\@gitlab\.com\:/https://gitlab.com/}
     providerUrlDifference=tree
